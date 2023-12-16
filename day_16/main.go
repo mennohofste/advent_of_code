@@ -8,7 +8,7 @@ import (
 )
 
 type Tile struct {
-	Beams map[Direction]bool
+	Beams [4]bool
 	Item  rune
 }
 
@@ -33,7 +33,7 @@ func getContraption() Contraption {
 	for _, line := range strings.Split(strings.Trim(string(content), "\n"), "\n") {
 		var row []Tile
 		for _, item := range line {
-			row = append(row, Tile{Item: item, Beams: make(map[Direction]bool)})
+			row = append(row, Tile{Item: item, Beams: [4]bool{false, false, false, false}})
 		}
 		contraption = append(contraption, row)
 	}
@@ -50,35 +50,26 @@ const (
 	UP
 )
 
-func newCoordinates(row, col int, direction Direction) (int, int) {
-	switch direction {
-	case RIGHT:
-		return row, col + 1
-	case DOWN:
-		return row + 1, col
-	case LEFT:
-		return row, col - 1
-	case UP:
-		return row - 1, col
-	}
-	return 0, 0
-}
-
-func (contraption Contraption) TraceBeam(row, col int, direction Direction) {
+func (contraption Contraption) TraceBeam(row, col int, direction Direction) int {
 	if row < 0 || row >= len(contraption) || col < 0 || col >= len(contraption[0]) || contraption[row][col].Beams[direction] {
-		return
+		return 0
+	}
+
+	energy := 0
+	if !contraption[row][col].Energised() {
+		energy++
 	}
 	contraption[row][col].Beams[direction] = true
 
 	if contraption[row][col].Item == '|' && (direction == RIGHT || direction == LEFT) {
-		contraption.TraceBeam(row-1, col, UP)
-		contraption.TraceBeam(row+1, col, DOWN)
-		return
+		energy += contraption.TraceBeam(row-1, col, UP)
+		energy += contraption.TraceBeam(row+1, col, DOWN)
+		return energy
 	}
 	if contraption[row][col].Item == '-' && (direction == DOWN || direction == UP) {
-		contraption.TraceBeam(row, col-1, LEFT)
-		contraption.TraceBeam(row, col+1, RIGHT)
-		return
+		energy += contraption.TraceBeam(row, col-1, LEFT)
+		energy += contraption.TraceBeam(row, col+1, RIGHT)
+		return energy
 	}
 
 	switch contraption[row][col].Item {
@@ -106,63 +97,55 @@ func (contraption Contraption) TraceBeam(row, col int, direction Direction) {
 		}
 	}
 
-	newRow, newCol := newCoordinates(row, col, direction)
-	contraption.TraceBeam(newRow, newCol, direction)
-}
-
-func (contraption Contraption) Energised() int {
-	sum := 0
-	for _, line := range contraption {
-		for _, tile := range line {
-			if tile.Energised() {
-				sum++
-			}
-		}
+	switch direction {
+	case RIGHT:
+		col++
+	case DOWN:
+		row++
+	case LEFT:
+		col--
+	case UP:
+		row--
 	}
-	return sum
+	return energy + contraption.TraceBeam(row, col, direction)
 }
 
 func (contraption Contraption) Reset() {
-	for _, line := range contraption {
-		for _, tile := range line {
-			for direction := range tile.Beams {
-				tile.Beams[direction] = false
-			}
+	for i, line := range contraption {
+		for j := range line {
+			contraption[i][j].Beams = [4]bool{false, false, false, false}
 		}
 	}
 }
 
-func part1() int {
-	contraption := getContraption()
-	contraption.TraceBeam(0, 0, RIGHT)
-	return contraption.Energised()
+func part1(contraption Contraption) int {
+	defer contraption.Reset()
+	return contraption.TraceBeam(0, 0, RIGHT)
 }
 
-func part2() int {
-	contraption := getContraption()
-
+func part2(contraption Contraption) int {
 	var maxEnergised int
 	for i := 0; i < len(contraption); i++ {
-		contraption.TraceBeam(i, 0, RIGHT)
-		maxEnergised = max(maxEnergised, contraption.Energised())
+		energy := contraption.TraceBeam(i, 0, RIGHT)
+		maxEnergised = max(maxEnergised, energy)
 		contraption.Reset()
 	}
 
 	for i := 0; i < len(contraption); i++ {
-		contraption.TraceBeam(i, len(contraption)-1, LEFT)
-		maxEnergised = max(maxEnergised, contraption.Energised())
+		energy := contraption.TraceBeam(i, len(contraption)-1, LEFT)
+		maxEnergised = max(maxEnergised, energy)
 		contraption.Reset()
 	}
 
 	for i := 0; i < len(contraption[0]); i++ {
-		contraption.TraceBeam(0, i, DOWN)
-		maxEnergised = max(maxEnergised, contraption.Energised())
+		energy := contraption.TraceBeam(0, i, DOWN)
+		maxEnergised = max(maxEnergised, energy)
 		contraption.Reset()
 	}
 
 	for i := 0; i < len(contraption[0]); i++ {
-		contraption.TraceBeam(len(contraption[0])-1, i, UP)
-		maxEnergised = max(maxEnergised, contraption.Energised())
+		energy := contraption.TraceBeam(len(contraption[0])-1, i, UP)
+		maxEnergised = max(maxEnergised, energy)
 		contraption.Reset()
 	}
 
@@ -170,6 +153,7 @@ func part2() int {
 }
 
 func main() {
-	fmt.Println("Part 1:", part1())
-	fmt.Println("Part 2:", part2())
+	contraption := getContraption()
+	fmt.Println("Part 1:", part1(contraption))
+	fmt.Println("Part 2:", part2(contraption))
 }
