@@ -57,18 +57,19 @@ func (contraption Contraption) TraceBeam(row, col int, direction Direction) int 
 	}
 	contraption[row][col].Beams |= direction
 
-	if contraption[row][col].Item == '|' && (direction == RIGHT || direction == LEFT) {
-		energy += contraption.TraceBeam(row-1, col, UP)
-		energy += contraption.TraceBeam(row+1, col, DOWN)
-		return energy
-	}
-	if contraption[row][col].Item == '-' && (direction == DOWN || direction == UP) {
-		energy += contraption.TraceBeam(row, col-1, LEFT)
-		energy += contraption.TraceBeam(row, col+1, RIGHT)
-		return energy
-	}
-
 	switch contraption[row][col].Item {
+	case '|':
+		if direction == RIGHT || direction == LEFT {
+			energy += contraption.TraceBeam(row-1, col, UP)
+			energy += contraption.TraceBeam(row+1, col, DOWN)
+			return energy
+		}
+	case '-':
+		if direction == DOWN || direction == UP {
+			energy += contraption.TraceBeam(row, col-1, LEFT)
+			energy += contraption.TraceBeam(row, col+1, RIGHT)
+			return energy
+		}
 	case '/':
 		switch direction {
 		case RIGHT:
