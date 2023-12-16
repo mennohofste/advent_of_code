@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -8,26 +9,13 @@ import (
 
 type Universe []string
 
-func getUniverse() Universe {
-	content, err := os.ReadFile("day_11/input.txt")
+func getLines() Universe {
+	bytes, err := os.ReadFile("day_11/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
-	content = content[:len(content)-1]
 
-	var universe Universe
-	for _, line := range strings.Split(string(content), "\n") {
-		universe = append(universe, line)
-	}
-	return universe
-}
-
-func (u Universe) String() string {
-	var s string
-	for _, line := range u {
-		s += string(line) + "\n"
-	}
-	return s
+	return strings.Split(strings.Trim(string(bytes), "\n"), "\n")
 }
 
 func (u Universe) CheckOccupation() ([]bool, []bool) {
@@ -78,7 +66,7 @@ func abs(x int) int {
 }
 
 func part1() int {
-	universe := getUniverse()
+	universe := getLines()
 	occupiedRows, occupiedCols := universe.CheckOccupation()
 	galaxies := universe.Galaxies(occupiedRows, occupiedCols, 2)
 
@@ -92,7 +80,7 @@ func part1() int {
 }
 
 func part2() int {
-	universe := getUniverse()
+	universe := getLines()
 	occupiedRows, occupiedCols := universe.CheckOccupation()
 	galaxies := universe.Galaxies(occupiedRows, occupiedCols, 1000000)
 
@@ -106,6 +94,6 @@ func part2() int {
 }
 
 func main() {
-	println("Part 1:", part1())
-	println("Part 2:", part2())
+	fmt.Println("Part 1:", part1())
+	fmt.Println("Part 2:", part2())
 }

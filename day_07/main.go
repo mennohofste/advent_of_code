@@ -12,13 +12,13 @@ import (
 
 var isPart2 = false
 
-func readLines() []string {
-	content, err := os.ReadFile("day_07/input.txt")
+func getLines() []string {
+	bytes, err := os.ReadFile("day_07/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
-	content = content[:len(content)-1] // remove trailing newline
-	return strings.Split(string(content), "\n")
+
+	return strings.Split(strings.Trim(string(bytes), "\n"), "\n")
 }
 
 type Card rune
@@ -195,7 +195,7 @@ func isOnePair(cardCounts map[Card]int) bool {
 }
 
 func part1() int {
-	lines := readLines()
+	lines := getLines()
 	hands := getHands(lines)
 	sortedHands := sortHands(hands)
 
@@ -213,6 +213,6 @@ func part2() int {
 }
 
 func main() {
-	fmt.Println(part1())
-	fmt.Println(part2())
+	fmt.Println("Part 1:", part1())
+	fmt.Println("Part 2:", part2())
 }

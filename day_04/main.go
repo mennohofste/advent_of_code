@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -116,6 +117,6 @@ func part2() int {
 }
 
 func main() {
-	println("Part 1:", part1())
-	println("Part 2:", part2())
+	fmt.Println("Part 1:", part1())
+	fmt.Println("Part 2:", part2())
 }

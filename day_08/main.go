@@ -1,18 +1,19 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strings"
 )
 
-func readLines() []string {
-	content, err := os.ReadFile("day_08/input.txt")
+func getLines() []string {
+	bytes, err := os.ReadFile("day_08/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
-	content = content[:len(content)-1] // remove trailing newline
-	return strings.Split(string(content), "\n")
+
+	return strings.Split(strings.Trim(string(bytes), "\n"), "\n")
 }
 
 type Node struct {
@@ -47,7 +48,7 @@ func getNodes(lines []string) map[string]*Node {
 }
 
 func part1() int {
-	lines := readLines()
+	lines := getLines()
 	instructions := lines[0]
 	nodeMap := getNodes(lines[2:])
 
@@ -88,7 +89,7 @@ func LCM(integers ...int) int {
 }
 
 func part2() int {
-	lines := readLines()
+	lines := getLines()
 	instructions := lines[0]
 	nodeMap := getNodes(lines[2:])
 
@@ -118,6 +119,6 @@ func part2() int {
 }
 
 func main() {
-	println("Part 1:", part1())
-	println("Part 2:", part2())
+	fmt.Println("Part 1:", part1())
+	fmt.Println("Part 2:", part2())
 }

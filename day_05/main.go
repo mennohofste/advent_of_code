@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -9,13 +10,12 @@ import (
 )
 
 func getLines() []string {
-	content, err := os.ReadFile("day_05/input.txt")
+	bytes, err := os.ReadFile("day_05/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
-	// Remove last newline
-	content = content[:len(content)-1]
-	return strings.Split(string(content), "\n")
+
+	return strings.Split(strings.Trim(string(bytes), "\n"), "\n")
 }
 
 func getCatgeoryMaps(lines []string) [][]Mapping {
@@ -176,6 +176,6 @@ func part2() uint32 {
 // }
 
 func main() {
-	println("Part 1:", part1())
-	println("Part 2:", part2())
+	fmt.Println("Part 1:", part1())
+	fmt.Println("Part 2:", part2())
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -25,21 +26,16 @@ func (n Number) NextTo(symbol Symbol) bool {
 	return n.Y-symbol.Y <= 1 && symbol.Y-n.Y <= 1 && n.XStart-1 <= symbol.X && symbol.X <= n.XEnd+1
 }
 
-func getSchematic() [][]rune {
-	content, err := os.ReadFile("day_03/input.txt")
+func getLines() []string {
+	bytes, err := os.ReadFile("day_03/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var schematic [][]rune
-	for _, line := range strings.Split(string(content), "\n") {
-		schematic = append(schematic, []rune(line))
-	}
-
-	return schematic
+	return strings.Split(strings.Trim(string(bytes), "\n"), "\n")
 }
 
-func getSymbols(schematic [][]rune) []Symbol {
+func getSymbols(schematic []string) []Symbol {
 	var symbols []Symbol
 	for i, line := range schematic {
 		for j, char := range line {
@@ -51,7 +47,7 @@ func getSymbols(schematic [][]rune) []Symbol {
 	return symbols
 }
 
-func getNumbers(schematic [][]rune) []Number {
+func getNumbers(schematic []string) []Number {
 	var numbers []Number
 	for i, line := range schematic {
 		numberStart := -1
@@ -85,7 +81,7 @@ func getNumbers(schematic [][]rune) []Number {
 }
 
 func part1() int {
-	schematic := getSchematic()
+	schematic := getLines()
 	symbols := getSymbols(schematic)
 	numbers := getNumbers(schematic)
 
@@ -103,7 +99,7 @@ func part1() int {
 }
 
 func part2() int {
-	schematic := getSchematic()
+	schematic := getLines()
 	symbols := getSymbols(schematic)
 	numbers := getNumbers(schematic)
 
@@ -129,6 +125,6 @@ func part2() int {
 }
 
 func main() {
-	println("Part 1:", part1())
-	println("Part 2:", part2())
+	fmt.Println("Part 1:", part1())
+	fmt.Println("Part 2:", part2())
 }
