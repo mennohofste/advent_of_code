@@ -13,12 +13,12 @@ import (
 var isPart2 = false
 
 func getLines() []string {
-	bytes, err := os.ReadFile("day_07/input.txt")
+	content, err := os.ReadFile("day_07/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return strings.Split(strings.Trim(string(bytes), "\n"), "\n")
+	return strings.Split(strings.Trim(string(content), "\n"), "\n")
 }
 
 type Card rune

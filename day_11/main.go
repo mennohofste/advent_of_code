@@ -10,12 +10,12 @@ import (
 type Universe []string
 
 func getLines() Universe {
-	bytes, err := os.ReadFile("day_11/input.txt")
+	content, err := os.ReadFile("day_11/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return strings.Split(strings.Trim(string(bytes), "\n"), "\n")
+	return strings.Split(strings.Trim(string(content), "\n"), "\n")
 }
 
 func (u Universe) CheckOccupation() ([]bool, []bool) {

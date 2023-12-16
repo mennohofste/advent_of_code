@@ -27,12 +27,12 @@ func (n Number) NextTo(symbol Symbol) bool {
 }
 
 func getLines() []string {
-	bytes, err := os.ReadFile("day_03/input.txt")
+	content, err := os.ReadFile("day_03/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return strings.Split(strings.Trim(string(bytes), "\n"), "\n")
+	return strings.Split(strings.Trim(string(content), "\n"), "\n")
 }
 
 func getSymbols(schematic []string) []Symbol {

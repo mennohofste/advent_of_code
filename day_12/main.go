@@ -9,12 +9,12 @@ import (
 )
 
 func getLines() []string {
-	bytes, err := os.ReadFile("day_12/input.txt")
+	content, err := os.ReadFile("day_12/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return strings.Split(strings.Trim(string(bytes), "\n"), "\n")
+	return strings.Split(strings.Trim(string(content), "\n"), "\n")
 }
 
 type SpringLayout struct {

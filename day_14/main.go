@@ -125,13 +125,13 @@ func (r Reflector) IsEqual(other Reflector) bool {
 }
 
 func getLines() [][]rune {
-	b, err := os.ReadFile("day_14/input.txt")
+	content, err := os.ReadFile("day_14/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	var field [][]rune
-	for _, line := range strings.Split(strings.Trim(string(b), "\n"), "\n") {
+	for _, line := range strings.Split(strings.Trim(string(content), "\n"), "\n") {
 		field = append(field, []rune(line))
 	}
 	return field

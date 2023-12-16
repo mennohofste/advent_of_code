@@ -8,12 +8,12 @@ import (
 )
 
 func getLines() []string {
-	bytes, err := os.ReadFile("day_13/input.txt")
+	content, err := os.ReadFile("day_13/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return strings.Split(strings.Trim(string(bytes), "\n"), "\n")
+	return strings.Split(strings.Trim(string(content), "\n"), "\n")
 }
 
 func getPatterns(lines []string) [][]string {
