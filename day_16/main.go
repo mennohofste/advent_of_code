@@ -5,20 +5,16 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 type Tile struct {
-	Beams [4]bool
+	Beams Direction
 	Item  rune
 }
 
 func (t Tile) Energised() bool {
-	for _, energised := range t.Beams {
-		if energised {
-			return true
-		}
-	}
-	return false
+	return t.Beams > 0
 }
 
 type Contraption [][]Tile
@@ -33,7 +29,7 @@ func getContraption() Contraption {
 	for _, line := range strings.Split(strings.Trim(string(content), "\n"), "\n") {
 		var row []Tile
 		for _, item := range line {
-			row = append(row, Tile{Item: item, Beams: [4]bool{false, false, false, false}})
+			row = append(row, Tile{Item: item, Beams: Direction(0)})
 		}
 		contraption = append(contraption, row)
 	}
@@ -41,17 +37,17 @@ func getContraption() Contraption {
 	return contraption
 }
 
-type Direction int
+type Direction byte
 
 const (
-	RIGHT Direction = iota
+	RIGHT Direction = 1 << iota
 	DOWN
 	LEFT
 	UP
 )
 
 func (contraption Contraption) TraceBeam(row, col int, direction Direction) int {
-	if row < 0 || row >= len(contraption) || col < 0 || col >= len(contraption[0]) || contraption[row][col].Beams[direction] {
+	if row < 0 || row >= len(contraption) || col < 0 || col >= len(contraption[0]) || (contraption[row][col].Beams&direction) > 0 {
 		return 0
 	}
 
@@ -59,7 +55,7 @@ func (contraption Contraption) TraceBeam(row, col int, direction Direction) int 
 	if !contraption[row][col].Energised() {
 		energy++
 	}
-	contraption[row][col].Beams[direction] = true
+	contraption[row][col].Beams |= direction
 
 	if contraption[row][col].Item == '|' && (direction == RIGHT || direction == LEFT) {
 		energy += contraption.TraceBeam(row-1, col, UP)
@@ -113,7 +109,7 @@ func (contraption Contraption) TraceBeam(row, col int, direction Direction) int 
 func (contraption Contraption) Reset() {
 	for i, line := range contraption {
 		for j := range line {
-			contraption[i][j].Beams = [4]bool{false, false, false, false}
+			contraption[i][j].Beams = Direction(0)
 		}
 	}
 }
@@ -153,7 +149,8 @@ func part2(contraption Contraption) int {
 }
 
 func main() {
+	startTime := time.Now()
 	contraption := getContraption()
-	fmt.Println("Part 1:", part1(contraption))
-	fmt.Println("Part 2:", part2(contraption))
+	fmt.Println("Part 1:", part1(contraption), time.Since(startTime))
+	fmt.Println("Part 2:", part2(contraption), time.Since(startTime))
 }
