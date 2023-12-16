@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 RED_CUBE_MAX = 12
 GREEN_CUBE_MAX = 13
 BLUE_CUBE_MAX = 14
@@ -55,7 +57,7 @@ def part_2(lines: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    with open("day_2/input.txt") as f:
+    with open("day_02/input.txt") as f:
         lines = f.readlines()
 
     print("Part 1:", part_1(lines))

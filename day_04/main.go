@@ -42,7 +42,7 @@ func (s Scratchcard) Wins() int {
 }
 
 func getScratchcards() []Scratchcard {
-	content, err := os.ReadFile("day_4/input.txt")
+	content, err := os.ReadFile("day_04/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}

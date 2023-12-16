@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+
+
 def part_1(lines: list[str]) -> int:
     total = 0
     for line in lines:
@@ -54,7 +57,7 @@ def part_2(lines: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    with open("day_1/input.txt") as f:
+    with open("day_01/input.txt") as f:
         lines = f.readlines()
 
     print("Part 1:", part_1(lines))

@@ -13,7 +13,7 @@ import (
 var isPart2 = false
 
 func readLines() []string {
-	content, err := os.ReadFile("day_7/input.txt")
+	content, err := os.ReadFile("day_07/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}

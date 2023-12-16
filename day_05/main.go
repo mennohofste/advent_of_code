@@ -9,7 +9,7 @@ import (
 )
 
 func getLines() []string {
-	content, err := os.ReadFile("day_5/input.txt")
+	content, err := os.ReadFile("day_05/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}

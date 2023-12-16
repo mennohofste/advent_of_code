@@ -7,7 +7,7 @@ import (
 )
 
 func readLines() []string {
-	content, err := os.ReadFile("day_8/input.txt")
+	content, err := os.ReadFile("day_08/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}

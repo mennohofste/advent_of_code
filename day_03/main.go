@@ -26,7 +26,7 @@ func (n Number) NextTo(symbol Symbol) bool {
 }
 
 func getSchematic() [][]rune {
-	content, err := os.ReadFile("day_3/input.txt")
+	content, err := os.ReadFile("day_03/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
