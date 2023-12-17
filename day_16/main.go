@@ -110,10 +110,10 @@ func (contraption Contraption) TraceBeam(row, col int, direction Direction) int 
 }
 
 func part1(contraption Contraption) int {
-	return clone(contraption).TraceBeam(0, 0, RIGHT)
+	return contraption.clone().TraceBeam(0, 0, RIGHT)
 }
 
-func clone(contraption Contraption) Contraption {
+func (contraption Contraption) clone() Contraption {
 	newContraption := make([][]Tile, len(contraption))
 	for i := range contraption {
 		newContraption[i] = slices.Clone(contraption[i])
@@ -129,28 +129,28 @@ func part2(contraption Contraption) int {
 	go func() {
 		defer wg.Done()
 		for i := range contraption {
-			out <- clone(contraption).TraceBeam(i, 0, RIGHT)
+			out <- contraption.clone().TraceBeam(i, 0, RIGHT)
 		}
 	}()
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		for i := range contraption {
-			out <- clone(contraption).TraceBeam(i, len(contraption)-1, LEFT)
+			out <- contraption.clone().TraceBeam(i, len(contraption)-1, LEFT)
 		}
 	}()
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		for i := range contraption[0] {
-			out <- clone(contraption).TraceBeam(0, i, DOWN)
+			out <- contraption.clone().TraceBeam(0, i, DOWN)
 		}
 	}()
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		for i := range contraption[0] {
-			out <- clone(contraption).TraceBeam(len(contraption[0])-1, i, UP)
+			out <- contraption.clone().TraceBeam(len(contraption[0])-1, i, UP)
 		}
 	}()
 
