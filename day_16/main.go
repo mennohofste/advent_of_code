@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -107,45 +109,60 @@ func (contraption Contraption) TraceBeam(row, col int, direction Direction) int 
 	return energy + contraption.TraceBeam(row, col, direction)
 }
 
-func (contraption Contraption) Reset() {
-	for i, line := range contraption {
-		for j := range line {
-			contraption[i][j].Beams = Direction(0)
-		}
-	}
+func part1(contraption Contraption) int {
+	return clone(contraption).TraceBeam(0, 0, RIGHT)
 }
 
-func part1(contraption Contraption) int {
-	defer contraption.Reset()
-	return contraption.TraceBeam(0, 0, RIGHT)
+func clone(contraption Contraption) Contraption {
+	newContraption := make([][]Tile, len(contraption))
+	for i := range contraption {
+		newContraption[i] = slices.Clone(contraption[i])
+	}
+	return newContraption
 }
 
 func part2(contraption Contraption) int {
+	out := make(chan int)
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := range contraption {
+			out <- clone(contraption).TraceBeam(i, 0, RIGHT)
+		}
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := range contraption {
+			out <- clone(contraption).TraceBeam(i, len(contraption)-1, LEFT)
+		}
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := range contraption[0] {
+			out <- clone(contraption).TraceBeam(0, i, DOWN)
+		}
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := range contraption[0] {
+			out <- clone(contraption).TraceBeam(len(contraption[0])-1, i, UP)
+		}
+	}()
+
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
+
 	var maxEnergised int
-	for i := 0; i < len(contraption); i++ {
-		energy := contraption.TraceBeam(i, 0, RIGHT)
-		maxEnergised = max(maxEnergised, energy)
-		contraption.Reset()
+	for i := range out {
+		maxEnergised = max(maxEnergised, i)
 	}
-
-	for i := 0; i < len(contraption); i++ {
-		energy := contraption.TraceBeam(i, len(contraption)-1, LEFT)
-		maxEnergised = max(maxEnergised, energy)
-		contraption.Reset()
-	}
-
-	for i := 0; i < len(contraption[0]); i++ {
-		energy := contraption.TraceBeam(0, i, DOWN)
-		maxEnergised = max(maxEnergised, energy)
-		contraption.Reset()
-	}
-
-	for i := 0; i < len(contraption[0]); i++ {
-		energy := contraption.TraceBeam(len(contraption[0])-1, i, UP)
-		maxEnergised = max(maxEnergised, energy)
-		contraption.Reset()
-	}
-
 	return maxEnergised
 }
 
