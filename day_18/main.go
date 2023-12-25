@@ -2,28 +2,61 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
 )
 
 type Instruction struct {
-	Color     string
 	Steps     int
 	Direction rune
 }
 
-func getDigPlan() []Instruction {
-	content, _ := os.ReadFile("day_18/input.txt")
+const (
+	SIMPLE  = 0
+	COMPLEX = 1
+)
+
+func getDigPlan(complexity int) []Instruction {
+	content, err := os.ReadFile("day_18/input.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	var instructions []Instruction
 	for _, line := range strings.Split(strings.Trim(string(content), "\n"), "\n") {
 		fields := strings.Fields(line)
-		direction := rune(fields[0][0])
-		steps, _ := strconv.Atoi(fields[1])
-		color := fields[2]
 
-		instructions = append(instructions, Instruction{Color: color, Steps: steps, Direction: direction})
+		var instruction Instruction
+		if complexity == SIMPLE {
+			instruction.Direction = rune(fields[0][0])
+			instruction.Steps, err = strconv.Atoi(fields[1])
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			// (#4f4602) -> 4f460, 2
+			color, direction := fields[2][2:len(fields[2])-2], fields[2][len(fields[2])-2]
+
+			switch direction {
+			case '0':
+				instruction.Direction = 'R'
+			case '1':
+				instruction.Direction = 'D'
+			case '2':
+				instruction.Direction = 'L'
+			case '3':
+				instruction.Direction = 'U'
+			}
+			steps, err := strconv.ParseInt(color, 16, 0)
+			if err != nil {
+				log.Fatal(err)
+			}
+			instruction.Steps = int(steps)
+		}
+
+		instructions = append(instructions, instruction)
 	}
 	return instructions
 }
@@ -33,20 +66,14 @@ type Position struct {
 	Col int
 }
 
-func (p Position) Sub(other Position) Position {
-	return Position{p.Row - other.Row, p.Col - other.Col}
-}
-
-func (p Position) Mul(factor int) Position {
-	return Position{p.Row * factor, p.Col * factor}
-}
-
-func getMaxDimensions(instructions []Instruction) (Position, Position) {
-	minPos := Position{0, 0}
-	maxPos := Position{0, 0}
+func getCoordinates(instructions []Instruction) ([]Position, int) {
+	var positions []Position
 	curPos := Position{0, 0}
 
+	length := 0
 	for _, instruction := range instructions {
+		length += instruction.Steps
+
 		switch instruction.Direction {
 		case 'U':
 			curPos.Row -= instruction.Steps
@@ -58,116 +85,52 @@ func getMaxDimensions(instructions []Instruction) (Position, Position) {
 			curPos.Col += instruction.Steps
 		}
 
-		if curPos.Row < minPos.Row {
-			minPos.Row = curPos.Row
-		}
-		if curPos.Row > maxPos.Row {
-			maxPos.Row = curPos.Row
-		}
-		if curPos.Col < minPos.Col {
-			minPos.Col = curPos.Col
-		}
-		if curPos.Col > maxPos.Col {
-			maxPos.Col = curPos.Col
-		}
+		positions = append(positions, curPos)
 	}
-	return maxPos.Sub(minPos), minPos.Mul(-1)
+
+	return positions, length
 }
 
-type CellState byte
-
-func (c CellState) String() string {
-	switch c {
-	case UNKNOWN:
-		return "?"
-	case INSIDE:
-		return "#"
-	case OUTSIDE:
-		return "."
-	}
-	return "E"
+func determinant(a, b Position) int {
+	return a.Col*b.Row - a.Row*b.Col
 }
 
-const (
-	UNKNOWN CellState = 1<<iota - 1
-	INSIDE
-	OUTSIDE
-)
-
-func getGrid(dimensions Position, startPos Position, instructions []Instruction) [][]CellState {
-	grid := make([][]CellState, dimensions.Row+1)
-	for i := range grid {
-		grid[i] = make([]CellState, dimensions.Col+1)
-	}
-
-	grid[startPos.Row][startPos.Col] = INSIDE
-	for _, instruction := range instructions {
-		for i := 0; i < instruction.Steps; i++ {
-			switch instruction.Direction {
-			case 'U':
-				startPos.Row--
-			case 'D':
-				startPos.Row++
-			case 'L':
-				startPos.Col--
-			case 'R':
-				startPos.Col++
-			}
-
-			grid[startPos.Row][startPos.Col] = INSIDE
-		}
-	}
-
-	return grid
-}
-
-func colorOutside(grid [][]CellState, pos Position) {
-	if pos.Row < 0 || pos.Row >= len(grid) || pos.Col < 0 || pos.Col >= len(grid[pos.Row]) || grid[pos.Row][pos.Col] != UNKNOWN {
-		return
-	}
-
-	grid[pos.Row][pos.Col] = OUTSIDE
-	for i := -1; i <= 1; i++ {
-		for j := -1; j <= 1; j++ {
-			colorOutside(grid, Position{pos.Row + i, pos.Col + j})
-		}
-	}
-}
-
-func colorGrid(grid [][]CellState) {
-	for i := range grid {
-		colorOutside(grid, Position{i, 0})
-		colorOutside(grid, Position{i, len(grid[i]) - 1})
-	}
-
-	for i := range grid[0] {
-		colorOutside(grid, Position{0, i})
-		colorOutside(grid, Position{len(grid) - 1, i})
-	}
-}
-
-func countInside(grid [][]CellState) int {
+func getTotalArea(coordinates []Position) int {
+	// Shoelace formula
 	total := 0
-	for _, line := range grid {
-		for _, cell := range line {
-			if cell == OUTSIDE {
-				total++
-			}
-		}
+	for i := 0; i < len(coordinates); i++ {
+		total += determinant(coordinates[i], coordinates[(i+1)%len(coordinates)])
 	}
-	return len(grid)*len(grid[0]) - total
+	return total / 2
+}
+
+func getTotalPoints(area, boundary int) int {
+	// interior points = i
+	// total area = A
+	// boundary points = b
+	//
+	// Pick's theorem
+	// A = i + b/2 - 1
+	// -> i = A - b/2 + 1
+	//
+	// total_points = i + b
+	//              = A - b/2 + 1 + b
+	//              = A + b/2 + 1
+	return area + boundary/2 + 1
 }
 
 func part1() int {
-	instructions := getDigPlan()
-	dimensions, startPos := getMaxDimensions(instructions)
-	grid := getGrid(dimensions, startPos, instructions)
-	colorGrid(grid)
-	return countInside(grid)
+	instructions := getDigPlan(SIMPLE)
+	coordinates, length := getCoordinates(instructions)
+	area := getTotalArea(coordinates)
+	return getTotalPoints(area, length)
 }
 
 func part2() int {
-	return 0
+	instructions := getDigPlan(COMPLEX)
+	coordinates, length := getCoordinates(instructions)
+	area := getTotalArea(coordinates)
+	return getTotalPoints(area, length)
 }
 
 func main() {
